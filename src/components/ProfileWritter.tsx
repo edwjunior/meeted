@@ -36,7 +36,7 @@ const codeSnippet = `public class Engineer {
 export default function ProfileWritter() {
     const [displayedText, setDisplayedText] = useState("");
     const [isVisible, setIsVisible] = useState(false);
-    const sectionRef = useRef(null);
+    const sectionRef = useRef<HTMLDivElement>(null);
 
     // 1. Detectar cuando el componente entra en el viewport
     useEffect(() => {
@@ -59,6 +59,13 @@ export default function ProfileWritter() {
         // Si aún no se ve en pantalla, no hacemos nada
         if (!isVisible) return;
 
+        // Con movimiento reducido, el primer tick escribe el bloque entero
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduceMotion) {
+            const timeout = setTimeout(() => setDisplayedText(codeSnippet), 0);
+            return () => clearTimeout(timeout);
+        }
+
         let currentIndex = 0;
 
         const typingInterval = setInterval(() => {
@@ -78,29 +85,29 @@ export default function ProfileWritter() {
     return (
         <div ref={sectionRef} className="relative max-w-sm mx-auto lg:mx-0 w-full">
             {/* Botones estilo ventana de macOS (opcional, para darle aspecto de terminal) */}
-            <div className="flex gap-2 mb-4">
-                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+            <div className="flex gap-2 mb-4" aria-hidden="true">
+                <div className="w-3 h-3 rounded-full bg-accent/80"></div>
+                <div className="w-3 h-3 rounded-full bg-white/20"></div>
+                <div className="w-3 h-3 rounded-full bg-cool/80"></div>
             </div>
-            <div className="relative rounded-xl overflow-hidden bg-[#0e1230] border border-[#2d5ec8]/15 aspect-[4/5]">
+            <div className="relative rounded-xl overflow-hidden bg-surface-raised border border-cool/15 aspect-[4/5]">
                 <pre
                     className="absolute inset-0 text-xs text-white/20 overflow-hidden p-6 leading-relaxed select-none font-mono"
                     aria-hidden="true">
                     <code>{displayedText}</code>
                 </pre>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0e1230]/70 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface-raised/70 via-transparent to-transparent" />
                 {/* Dual-color bottom bar — blue left, warm right */}
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#2d5ec8] to-[#c91029]" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cool to-accent" />
             </div>
 
             {/* Experience badge */}
-            <div className="absolute -bottom-5 -right-5 bg-[#c91029] text-white p-4 rounded-xl shadow-2xl shadow-[#c91029]/30 text-center">
-                <span className="block text-4xl font-bold leading-none">3+</span>
-                <span className="block text-[11px] font-semibold mt-1.5 leading-tight uppercase tracking-wide">
-                    Years of
+            <div className="absolute -bottom-5 -right-5 bg-accent text-white p-4 rounded-xl shadow-2xl shadow-accent/30 text-center">
+                <span className="block font-heading text-4xl font-bold leading-none tabular-nums">3+</span>
+                <span className="block text-xs font-medium mt-1.5 leading-tight">
+                    years of
                     <br />
-                    Experience
+                    experience
                 </span>
             </div>
         </div>

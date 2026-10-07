@@ -1,9 +1,6 @@
-"use client";
-
 import Image from "next/image";
-import { motion } from "framer-motion";
 
-const SI = "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons";
+const SI = "https://cdn.jsdelivr.net/npm/simple-icons@16.34.0/icons";
 
 interface TickerItem {
   name: string;
@@ -27,54 +24,36 @@ const technologies: TickerItem[] = [
   { name: "Liferay",      logo: "/res/logos/liferay.webp" }
 ];
 
-// Duplicate so -50% translate creates a seamless infinite loop
-const row = [...technologies, ...technologies];
-
-function TickerRow({
-  items,
-  direction,
-  duration,
-}: {
-  items: TickerItem[];
-  direction: "left" | "right";
-  duration: number;
-}) {
-  const from = direction === "left" ? "0%" : "-50%";
-  const to   = direction === "left" ? "-50%" : "0%";
-
+function LogoSet({ hidden = false }: { hidden?: boolean }) {
   return (
-    <div className="relative overflow-hidden">
-      <motion.div
-        className="flex items-center gap-16 w-max py-3"
-        animate={{ x: [from, to] }}
-        transition={{ duration, ease: "linear", repeat: Infinity }}
-      >
-        {items.map((item, i) => (
-          <div key={`${item.name}-${i}`} title={item.name} className="shrink-0 flex items-center justify-center">
-            <Image
-              src={item.logo}
-              alt={item.name}
-              width={0}
-              height={0}
-              sizes="160px"
-              className="h-10 w-auto object-contain brightness-0 invert opacity-50 hover:opacity-90 transition-opacity duration-300"
-            />
-          </div>
-        ))}
-      </motion.div>
-
-      {/* Edge fades — match the section background */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#07091c] to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#07091c] to-transparent z-10" />
-    </div>
+    // Padding instead of gap: each set carries its own trailing space, so -50% lands exactly on the copy
+    <ul className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
+      {technologies.map((item) => (
+        <li key={item.name} title={hidden ? undefined : item.name} className="shrink-0 pr-16">
+          <Image
+            src={item.logo}
+            alt={hidden ? "" : item.name}
+            width={0}
+            height={0}
+            sizes="160px"
+            className="h-10 w-auto object-contain brightness-0 invert opacity-50 transition-opacity duration-200 hover:opacity-90"
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 
+// Pure CSS marquee: runs on the compositor, so it stays smooth while the page is busy.
+// Hovering pauses it, so a logo can be looked at. Reduced motion stops it (see globals.css).
 export default function StatsTicker() {
   return (
-    <section className="py-12 border-y border-white/5">
-      <div className="max-w-7xl mx-auto overflow-hidden">
-        <TickerRow items={row} direction="left" duration={40} />
+    <section aria-label="Technologies I work with" className="py-12 border-y border-white/5">
+      <div className="max-w-7xl mx-auto overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6rem,black_calc(100%-6rem),transparent)]">
+        <div className="flex w-max py-3 animate-marquee hover:[animation-play-state:paused]">
+          <LogoSet />
+          <LogoSet hidden />
+        </div>
       </div>
     </section>
   );

@@ -1,28 +1,187 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — palette derived from the hero portrait.
+ * Use these utilities (bg-ink, text-muted, border-accent…) instead of raw hex values
+ * so the palette can be tuned from a single place.
+ */
 @theme inline {
-  --color-background: #07091c;
-  --color-foreground: #e8ecf8;
+  /* Surfaces: one cool-navy family, from darkest to lightest */
+  --color-ink: #07091c;
+  --color-surface: #0a0d22;
+  --color-surface-raised: #0e1230;
+
+  /* Text */
+  --color-fg: #e8ecf8;
+  --color-pale: #b8ccec;
+  --color-muted: #8090b8;
+  --color-subtle: #7a9ad0;
+
+  /* Accent (warm light) — the only color used for primary actions */
+  --color-accent: #bf1d33;
+  --color-accent-hover: #a3182b;
+
+  /* Cool light — ambient/secondary, never for primary actions */
+  --color-cool: #2d5ec8;
+  --color-cool-hover: #2050b8;
+  --color-cool-soft: #5580d8;
+
+  --color-background: var(--color-ink);
+  --color-foreground: var(--color-fg);
+  /* shadcn-style alias used by components in components/ui */
+  --color-muted-foreground: var(--color-muted);
+
+  --animate-rise: rise 600ms var(--ease-out-strong) both;
+  --animate-scroll-cue: scroll-cue 2.4s var(--ease-in-out-strong) infinite;
+  --animate-marquee: marquee 40s linear infinite;
+
   --font-heading: var(--font-space-grotesk);
   --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* Motion curves — built-in CSS easings are too weak. `static` always emits them on :root
+   so plain CSS can use var(--ease-out-strong) too, not only the ease-* utilities */
+@theme static {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
 html {
+  /* Paints the scrollbar gutter too */
+  background: var(--color-ink);
   scroll-behavior: smooth;
+  /* Keep anchored sections clear of the fixed navbar */
+  scroll-padding-top: 5rem;
+  /* Reserve the scrollbar slot so locking scroll (modal) does not shift the layout */
+  scrollbar-gutter: stable;
 }
 
 body {
-  background: #07091c;
-  color: #e8ecf8;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--color-ink);
+  color: var(--color-fg);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+/* In @layer base so utilities (font-mono, text-wrap-*) can still override */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Visible keyboard focus everywhere; mouse clicks don't trigger it */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Subtle film grain over the whole page to break digital flatness */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  40% {
+    opacity: 1;
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+ * Reduced motion = fewer, gentler animations, not zero.
+ * Movement goes away; opacity/color transitions stay because they aid comprehension.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-rise {
+    animation: fade 300ms ease both;
+  }
+  .animate-scroll-cue,
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+@layer components {
+  /* One height for every button so rows of CTAs line up */
+  .btn {
+    @apply inline-flex h-12 items-center justify-center gap-2.5 rounded px-6 text-sm font-semibold cursor-pointer select-none;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease,
+      box-shadow 200ms ease,
+      transform 160ms var(--ease-out-strong);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn-sm {
+    @apply h-10 px-5;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-white shadow-lg shadow-accent/20 hover:bg-accent-hover hover:shadow-accent/30;
+  }
+
+  .btn-ghost {
+    @apply border border-white/15 text-pale hover:border-cool/50 hover:text-white;
+  }
+
+  /* Section label: mono, sentence case, numbered — replaces ALL-CAPS eyebrows */
+  .eyebrow {
+    @apply inline-flex items-center gap-3 font-mono text-xs text-subtle;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-6 bg-accent;
+  }
 }
