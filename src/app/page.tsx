@@ -6,7 +6,7 @@ import SkillsBars from "@/components/SkillsBars";
 import ProfileWritter from "@/components/ProfileWritter";
 import WorkSection from "@/components/PortfolioCards";
 import StatsTicker from "@/components/StatsTicker";
-import { SqueezeCarousel, type SqueezeSlide } from "@/components/ui/carousel-squeeze";
+import { CircularTestimonials, type Testimonial } from "@/components/ui/circular-testimonials";
 import { IconDownload, IconArrow } from "@/components/icons";
 import padelPhoto from "../../public/res/personal/padel.webp";
 import crossfitPhoto from "../../public/res/personal/crossfit.webp";
@@ -169,61 +169,45 @@ function AboutSection() {
 
 // ─── Personal ────────────────────────────────────────────────────────────────
 
-/** Corner label on the open panel — same mono style as the section eyebrows. */
-const panelMark = (n: number, name: string) => (
-  <span className="font-mono text-xs text-white/90">
-    0{n} · {name}
-  </span>
-);
-
 /**
  * Runs the photo through the Next.js image optimizer: the browser picks a resized
  * WebP from `srcSet` instead of downloading the original (padel.webp is 4725px / 1.8 MB).
- * The open panel is at most ~720px wide, so `sizes` lets a 2x screen settle on ~1440px.
+ * The image card is at most ~560px wide, so `sizes` lets a 2x screen settle on ~1200px.
  */
 function photo(img: StaticImageData, alt: string) {
   const { props } = getImageProps({
     src: img,
     alt,
-    sizes: "(max-width: 640px) 100vw, 720px",
+    sizes: "(max-width: 768px) 100vw, 560px",
   });
-  return {
-    image: props.src,
-    imageSrcSet: props.srcSet,
-    imageSizes: props.sizes,
-    imageAlt: alt,
-  };
+  return { src: props.src, srcSet: props.srcSet, sizes: props.sizes, alt };
 }
 
-// The photos are portraits; the carousel crops them to 16:9.
-// `imagePosition` picks the band that stays visible (vertical % = where the subject is).
-const personalSlides: SqueezeSlide[] = [
+// The photos are portraits cropped into a wider card: `objectPosition` keeps the subject in frame.
+const hobbies: Testimonial[] = [
   {
-    id: "padel",
-    title: "Padel.",
-    description:
+    name: "Padel",
+    designation: "01 / Sport & thesis",
+    quote:
       "My go-to sport. I even built a sensor for my racket as my thesis — combining sport and engineering felt completely natural.",
     ...photo(padelPhoto, "Eduard on a padel court, racket in hand, next to the net"),
-    imagePosition: "50% 42%",
-    overlay: panelMark(1, "Padel"),
+    objectPosition: "50% 40%",
   },
   {
-    id: "crossfit",
-    title: "Crossfit.",
-    description:
+    name: "Crossfit",
+    designation: "02 / Discipline",
+    quote:
       "Discipline outside the gym translates directly to work. Consistency, pushing limits, and measuring progress — every session.",
     ...photo(crossfitPhoto, "Eduard holding a barbell overhead at a CrossFit competition"),
-    imagePosition: "50% 30%",
-    overlay: panelMark(2, "Crossfit"),
+    objectPosition: "50% 30%",
   },
   {
-    id: "drone",
-    title: "Drone pilot.",
+    name: "Drone pilot",
+    designation: "03 / FPV",
     // TODO(eduard): texto definitivo
-    description: "Placeholder — final copy coming soon.",
+    quote: "Placeholder — final copy coming soon.",
     ...photo(dronePhoto, "Eduard wearing FPV goggles, launching a small drone from his hand"),
-    imagePosition: "50% 38%",
-    overlay: panelMark(3, "Drone pilot"),
+    objectPosition: "50% 35%",
   },
 ];
 
@@ -243,17 +227,7 @@ function PersonalSection() {
           </p>
         </div>
 
-        <SqueezeCarousel
-          slides={personalSlides}
-          label="Beyond the code"
-          accent="var(--color-accent)"
-          accentForeground="#fff"
-          panelClassName="bg-surface-raised"
-          height="clamp(150px, 30cqi, 400px)"
-          gap="clamp(8px, 1.5cqi, 16px)"
-          // Inherit DM Sans instead of the component's bundled Geist
-          style={{ fontFamily: "inherit" }}
-        />
+        <CircularTestimonials testimonials={hobbies} label="Beyond the code" />
       </div>
     </section>
   );
