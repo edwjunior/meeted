@@ -8,13 +8,13 @@
  *  - Autoplay off by default, paused on hover/focus, disabled for reduced motion.
  *  - Word reveal keeps a light blur (4px) and short stagger; skipped entirely for reduced motion.
  *  - No measuring on resize: the side offset is CSS (container query units).
- *  - Existing IconArrow instead of adding react-icons for two glyphs.
+ *  - Phosphor arrows (the project icon set) instead of adding react-icons.
  */
 
 import { useCallback, useEffect, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-import { IconArrow } from "@/components/icons";
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export interface Testimonial {
@@ -126,13 +126,13 @@ export const CircularTestimonials = ({
 
   // Colours and sizes travel as CSS variables, so hover states stay in CSS (no hover state in React)
   const vars = {
-    "--ct-name": colors.name ?? "var(--color-fg)",
-    "--ct-designation": colors.designation ?? "var(--color-subtle)",
-    "--ct-quote": colors.testimony ?? "var(--color-muted)",
-    "--ct-arrow-bg": colors.arrowBackground ?? "var(--color-surface-raised)",
-    "--ct-arrow-fg": colors.arrowForeground ?? "var(--color-fg)",
-    "--ct-arrow-hover": colors.arrowHoverBackground ?? "var(--color-accent)",
-    "--ct-size-name": fontSizes.name ?? "1.75rem",
+    "--ct-name": colors.name ?? "var(--color-paper)",
+    "--ct-designation": colors.designation ?? "var(--color-mist)",
+    "--ct-quote": colors.testimony ?? "var(--color-secondary)",
+    "--ct-arrow-bg": colors.arrowBackground ?? "transparent",
+    "--ct-arrow-fg": colors.arrowForeground ?? "var(--color-paper)",
+    "--ct-arrow-hover": colors.arrowHoverBackground ?? "var(--color-paper)",
+    "--ct-size-name": fontSizes.name ?? "clamp(1.75rem, 3vw, 2.5rem)",
     "--ct-size-designation": fontSizes.designation ?? "0.8125rem",
     "--ct-size-quote": fontSizes.quote ?? "1.125rem",
   } as CSSProperties;
@@ -152,13 +152,13 @@ export const CircularTestimonials = ({
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
-      className={cn("w-full rounded-2xl", className)}
+      className={cn("w-full rounded-3xl", className)}
       style={vars}
     >
       <div className="grid gap-16 md:grid-cols-2 md:items-center md:gap-20">
         {/* Images — side ones are clickable shortcuts; the arrows are the accessible controls */}
         <div
-          className="relative mx-auto mt-12 h-[22rem] w-[calc(100%-4rem)] [container-type:inline-size] md:w-full [perspective:1000px] md:h-[26rem]"
+          className="relative mx-auto mt-12 h-[22rem] w-[calc(100%-4rem)] [container-type:inline-size] md:w-[calc(100%-6rem)] [perspective:1000px] md:h-[26rem]"
           style={{ "--ct-gap": "clamp(36px, 15cqi, 72px)" } as CSSProperties}
         >
           {testimonials.map((t, index) => {
@@ -177,7 +177,7 @@ export const CircularTestimonials = ({
                 onClick={slot === "left" ? handlePrev : slot === "right" ? handleNext : undefined}
                 className={cn(
                   "absolute inset-0 h-full w-full select-none rounded-3xl object-cover",
-                  "shadow-[0_20px_40px_-12px_rgba(3,5,20,0.7)]",
+                  "border border-white/10 shadow-float",
                   "transition-[transform,opacity] duration-[600ms] ease-out-strong motion-reduce:transition-opacity",
                   (slot === "left" || slot === "right") && "cursor-pointer",
                 )}
@@ -199,7 +199,7 @@ export const CircularTestimonials = ({
                 exit={{ opacity: 0, transform: "translateY(-8px)", transition: { duration: 0.15, ease: EASE_OUT } }}
               >
                 <h3
-                  className="font-heading font-bold tracking-tight"
+                  className="font-semibold tracking-tight"
                   style={{ color: "var(--ct-name)", fontSize: "var(--ct-size-name)" }}
                 >
                   {active.name}
@@ -235,7 +235,7 @@ export const CircularTestimonials = ({
           <div className="flex items-center gap-4 pt-10">
             <ArrowButton label="Previous" onClick={handlePrev} back />
             <ArrowButton label="Next" onClick={handleNext} />
-            <span className="ml-2 font-mono text-xs tabular-nums text-subtle" aria-hidden="true">
+            <span className="meta ml-2 tabular-nums" aria-hidden="true">
               {String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
             </span>
           </div>
@@ -252,14 +252,13 @@ function ArrowButton({ label, onClick, back = false }: { label: string; onClick:
       aria-label={label}
       onClick={onClick}
       className={cn(
-        "grid size-11 cursor-pointer place-items-center rounded-full border border-white/10",
-        "bg-[var(--ct-arrow-bg)] text-[var(--ct-arrow-fg)] hover:bg-[var(--ct-arrow-hover)]",
-        "transition-[background-color,scale] duration-200 ease-out-strong active:scale-[0.97]",
+        "cursor-target grid size-11 cursor-pointer place-items-center rounded-full border border-white/15",
+        "bg-[var(--ct-arrow-bg)] text-[var(--ct-arrow-fg)]",
+        "hover:border-[var(--ct-arrow-hover)] hover:bg-[var(--ct-arrow-hover)] hover:text-ink",
+        "transition-[background-color,border-color,color,scale] duration-300 ease-out-expo active:scale-[0.97] active:duration-150",
       )}
     >
-      <span className={back ? "rotate-180" : undefined}>
-        <IconArrow />
-      </span>
+      {back ? <ArrowLeftIcon size={18} weight="bold" /> : <ArrowRightIcon size={18} weight="bold" />}
     </button>
   );
 }

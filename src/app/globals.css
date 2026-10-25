@@ -1,187 +1,426 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — palette derived from the hero portrait.
- * Use these utilities (bg-ink, text-muted, border-accent…) instead of raw hex values
- * so the palette can be tuned from a single place.
+ * Design system "ink / paper / ember" (from web-projects-inspiration/Project 1 Aaftab).
+ * Dark-only by design: the system defines a single warm-dark theme.
+ * Use the token utilities (bg-ink, text-paper, text-mist, bg-brand-500, ease-out-expo…)
+ * instead of raw hex values.
+ *
+ * Z-index scale (keep to these):
+ *   nav 50 · overlays 55 · grain 60 · target cursor 70 · skip link 80
  */
-@theme inline {
-  /* Surfaces: one cool-navy family, from darkest to lightest */
-  --color-ink: #07091c;
-  --color-surface: #0a0d22;
-  --color-surface-raised: #0e1230;
+@theme {
+  /* Base palette */
+  --color-ink: #0b0b0c;
+  --color-ink-2: #121214;
+  --color-ink-3: #1a1a1d;
+  --color-paper: #f3f0ea;
+  --color-mist: #a9a59d;
+  --color-mist-2: #8e8a83;
 
-  /* Text */
-  --color-fg: #e8ecf8;
-  --color-pale: #b8ccec;
-  --color-muted: #8090b8;
-  --color-subtle: #7a9ad0;
+  /* Brand (ember) — the only accent */
+  --color-brand-50: #fff1ec;
+  --color-brand-100: #ffe0d5;
+  --color-brand-200: #ffc3ad;
+  --color-brand-300: #ff9f7f;
+  --color-brand-400: #ff7b52;
+  --color-brand-500: #ff5b2e;
+  --color-brand-600: #cc3a0e;
+  --color-brand-700: #b2300b;
+  --color-brand-800: #92280c;
+  --color-brand-900: #7a2412;
+  --color-brand-950: #431009;
 
-  /* Accent (warm light) — the only color used for primary actions */
-  --color-accent: #bf1d33;
-  --color-accent-hover: #a3182b;
+  /* Semantic text colours: text-primary, text-secondary, text-tertiary… */
+  --color-primary: var(--color-paper);
+  --color-secondary: #d4d0c8;
+  --color-tertiary: var(--color-mist);
+  --color-quaternary: var(--color-mist-2);
+  --color-placeholder: #857f76;
 
-  /* Cool light — ambient/secondary, never for primary actions */
-  --color-cool: #2d5ec8;
-  --color-cool-hover: #2050b8;
-  --color-cool-soft: #5580d8;
+  /* Typography — Geist via next/font (variables set in layout.tsx) */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-background: var(--color-ink);
-  --color-foreground: var(--color-fg);
-  /* shadcn-style alias used by components in components/ui */
-  --color-muted-foreground: var(--color-muted);
+  --text-md: 1rem;
+  --text-md--line-height: 1.5rem;
 
-  --animate-rise: rise 600ms var(--ease-out-strong) both;
-  --animate-scroll-cue: scroll-cue 2.4s var(--ease-in-out-strong) infinite;
-  --animate-marquee: marquee 40s linear infinite;
+  /* Shadows */
+  --shadow-float: 0 12px 45px rgba(0, 0, 0, 0.95);
 
-  --font-heading: var(--font-space-grotesk);
-  --font-sans: var(--font-dm-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-/* Motion curves — built-in CSS easings are too weak. `static` always emits them on :root
-   so plain CSS can use var(--ease-out-strong) too, not only the ease-* utilities */
-@theme static {
+  /* Motion: the system's signature curve + Emil's strong ease-out for UI feedback */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --animate-page-in: page-in 0.6s var(--ease-out-expo) both;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-marquee: marquee 45s linear infinite;
+
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(255 91 46 / 0.55);
+    }
+    50% {
+      box-shadow: 0 0 0 7px rgb(255 91 46 / 0);
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
-html {
-  /* Paints the scrollbar gutter too */
-  background: var(--color-ink);
-  scroll-behavior: smooth;
-  /* Keep anchored sections clear of the fixed navbar */
-  scroll-padding-top: 5rem;
-  /* Reserve the scrollbar slot so locking scroll (modal) does not shift the layout */
-  scrollbar-gutter: stable;
-}
-
-body {
-  -webkit-tap-highlight-color: transparent;
-  background: var(--color-ink);
-  color: var(--color-fg);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-}
-
-/* In @layer base so utilities (font-mono, text-wrap-*) can still override */
+/* ==========================================================================
+   Base
+   ========================================================================== */
 @layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-ink);
+    scroll-padding-top: 6rem;
+    /* Reserve the scrollbar slot so locking scroll never shifts the layout */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   h1,
   h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  h3 {
     text-wrap: balance;
   }
 
   p {
     text-wrap: pretty;
   }
+
+  ::selection {
+    background: var(--color-brand-500);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 3px;
+    border-radius: 9999px;
+  }
 }
 
-/* Visible keyboard focus everywhere; mouse clicks don't trigger it */
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 4px;
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
-/* Subtle film grain over the whole page to break digital flatness */
+/*
+ * Reduced motion = fewer, gentler animations, not zero:
+ * movement goes, opacity/colour changes stay.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-in {
+    animation: fade-in 300ms ease both;
+  }
+  .animate-marquee,
+  .animate-pulse-dot {
+    animation: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Subtle film grain over the page — fixed + pointer-events-none so it never repaints on scroll */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-@keyframes scroll-cue {
-  0% {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  40% {
-    opacity: 1;
-  }
-  80%,
-  100% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-}
-
-/*
- * Reduced motion = fewer, gentler animations, not zero.
- * Movement goes away; opacity/color transitions stay because they aid comprehension.
- */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .animate-rise {
-    animation: fade 300ms ease both;
-  }
-  .animate-scroll-cue,
-  .animate-marquee {
-    animation: none;
-  }
-}
-
+/* ==========================================================================
+   Components — ported from tokens.css
+   Radius rule: everything interactive is a full pill; containers and images use rounded-3xl.
+   ========================================================================== */
 @layer components {
-  /* One height for every button so rows of CTAs line up */
-  .btn {
-    @apply inline-flex h-12 items-center justify-center gap-2.5 rounded px-6 text-sm font-semibold cursor-pointer select-none;
-    transition:
-      background-color 200ms ease,
-      border-color 200ms ease,
-      color 200ms ease,
-      box-shadow 200ms ease,
-      transform 160ms var(--ease-out-strong);
-  }
-  .btn:active {
-    transform: scale(0.97);
-  }
-  .btn-sm {
-    @apply h-10 px-5;
+  .container-x {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 3.5rem);
   }
 
-  .btn-primary {
-    @apply bg-accent text-white shadow-lg shadow-accent/20 hover:bg-accent-hover hover:shadow-accent/30;
+  .section {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    padding-block: 7rem;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 10rem;
+    }
   }
 
-  .btn-ghost {
-    @apply border border-white/15 text-pale hover:border-cool/50 hover:text-white;
-  }
-
-  /* Section label: mono, sentence case, numbered — replaces ALL-CAPS eyebrows */
   .eyebrow {
-    @apply inline-flex items-center gap-3 font-mono text-xs text-subtle;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-mist);
   }
   .eyebrow::before {
     content: "";
-    @apply h-px w-6 bg-accent;
+    height: 1px;
+    width: 2rem;
+    background: rgb(255 255 255 / 0.25);
+  }
+
+  .display-h1 {
+    font-size: clamp(3rem, 8vw, 8.5rem);
+    font-weight: 600;
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+  .display-h2 {
+    font-size: clamp(2.1rem, 5.6vw, 5.25rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+  .display-h3 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+  }
+  .display-footer {
+    font-size: clamp(2.6rem, 11.4vw, 13.5rem);
+    font-weight: 600;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+  }
+
+  .lead {
+    font-size: 1.125rem;
+    line-height: 1.625;
+    color: var(--color-secondary);
+    max-width: 42rem;
+  }
+
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.025em;
+    color: var(--color-mist);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgb(255 255 255 / 0.15);
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.025em;
+    color: var(--color-secondary);
+  }
+
+  /* Link whose underline draws in on hover */
+  .uv-link {
+    color: inherit;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition:
+      background-size 0.5s var(--ease-out-expo),
+      color 150ms ease;
+  }
+  .uv-link:hover,
+  .uv-link:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Round arrow button: fills from below on .group hover; arrow tilts to "go" */
+  .uv-arrow {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    border: 1px solid currentColor;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .uv-arrow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    transform: translateY(101%);
+    transition: transform 0.45s var(--ease-out-expo);
+  }
+  .uv-arrow > svg {
+    position: relative;
+    z-index: 1;
+    mix-blend-mode: difference;
+    transition: transform 0.45s var(--ease-out-expo);
+  }
+  .group:hover .uv-arrow::after,
+  .group:focus-visible .uv-arrow::after {
+    transform: none;
+  }
+  .group:hover .uv-arrow > svg,
+  .group:focus-visible .uv-arrow > svg {
+    transform: translateX(1px) rotate(-45deg);
+  }
+
+  /* Pill buttons. One height so CTA rows line up; press feedback per Emil (scale 0.97) */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.75rem;
+    padding-inline: 1.25rem;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 300ms var(--ease-out-expo),
+      color 300ms var(--ease-out-expo),
+      border-color 300ms var(--ease-out-expo),
+      scale 160ms var(--ease-out-strong);
+  }
+  .btn:active {
+    scale: 0.97;
+  }
+  .btn-primary {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  .btn-primary:hover {
+    background: var(--color-brand-500);
+  }
+  .btn-ghost {
+    color: var(--color-paper);
+    border-color: rgb(255 255 255 / 0.15);
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-paper);
+  }
+
+  /* Floating glass surfaces (nav, mobile menu) */
+  .glass {
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(18 18 20 / 0.62);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass {
+      background: var(--color-ink-2);
+      backdrop-filter: none;
+    }
+  }
+
+  /* Short line bullet */
+  .dash-list {
+    display: grid;
+    gap: 0.75rem;
+    color: var(--color-secondary);
+  }
+  .dash-list li {
+    display: flex;
+    gap: 1rem;
+  }
+  .dash-list li::before {
+    content: "";
+    flex-shrink: 0;
+    margin-top: 0.75rem;
+    height: 1px;
+    width: 1rem;
+    background: var(--color-brand-500);
+  }
+
+  /* Target cursor (see components/interactions/TargetCursor.tsx) */
+  .tc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 70;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .tc-dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--tc-color);
+    translate: -50% -50%;
+  }
+  .tc-corner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border: 3px solid var(--tc-color);
+    will-change: transform;
+  }
+  .tc-corner:nth-child(2) {
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .tc-corner:nth-child(3) {
+    border-left: 0;
+    border-bottom: 0;
+  }
+  .tc-corner:nth-child(4) {
+    border-left: 0;
+    border-top: 0;
+  }
+  .tc-corner:nth-child(5) {
+    border-right: 0;
+    border-top: 0;
   }
 }

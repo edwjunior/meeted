@@ -1,21 +1,19 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import Image, { getImageProps, type StaticImageData } from "next/image";
+import { getImageProps, type StaticImageData } from "next/image";
+import { ArrowUpIcon, ArrowUpRightIcon, DownloadSimpleIcon } from "@phosphor-icons/react/dist/ssr";
+
 import Navbar from "@/components/Navbar";
-import SkillsBars from "@/components/SkillsBars";
-import ProfileWritter from "@/components/ProfileWritter";
-import WorkSection from "@/components/PortfolioCards";
+import WorkSection from "@/components/WorkSection";
 import StatsTicker from "@/components/StatsTicker";
+import Magnet from "@/components/interactions/Magnet";
 import { CircularTestimonials, type Testimonial } from "@/components/ui/circular-testimonials";
-import { IconDownload, IconArrow } from "@/components/icons";
+import ProfileCard from "@/components/ui/profile-card";
+import { CONTACT_LABEL, EMAIL, LINKEDIN } from "@/lib/site";
+import portrait from "../../public/res/edu-portrait.png";
 import padelPhoto from "../../public/res/personal/padel.webp";
 import crossfitPhoto from "../../public/res/personal/crossfit.webp";
 import dronePhoto from "../../public/res/personal/drone.webp";
-
-// Palette lives in globals.css (@theme). Use token utilities: bg-ink, text-muted, bg-accent…
-
-const EMAIL = "edupuigjunior.6@gmail.com";
-const LINKEDIN = "https://www.linkedin.com/in/eduard-puig-valls/";
 
 // Drop the PDF in public/res/ and the "Download CV" button appears automatically.
 // Checked at build time (Server Component), so no dead link ships in the meantime.
@@ -24,96 +22,74 @@ const hasCv = existsSync(join(process.cwd(), "public", CV_PATH));
 
 // ─── Hero ────────────────────────────────────────────────────────────────────
 
+// Optimized, responsive portrait for the profile card (the PNG source is 1685px / 4.6 MB)
+const { props: portraitImg } = getImageProps({
+  src: portrait,
+  alt: "Portrait of Eduard Puig Valls",
+  sizes: "(max-width: 1024px) 100vw, 448px",
+});
+const portraitProps = {
+  avatarUrl: portraitImg.src,
+  avatarSrcSet: portraitImg.srcSet,
+  avatarSizes: portraitImg.sizes,
+  avatarAlt: portraitImg.alt,
+};
+
 function HeroSection() {
   return (
-    <section
-      id="home"
-      className="relative min-h-[100dvh] flex items-center overflow-hidden pt-20"
-    >
-      {/* Warm-red corner blocks — echo the photo's right-side warm light */}
-      <div
-        className="absolute top-0 left-0 w-28 h-[420px] bg-accent -translate-x-10 rounded-r-sm z-0"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute bottom-0 right-0 w-28 h-[420px] bg-accent translate-x-10 rounded-l-sm z-0"
-        aria-hidden="true"
-      />
+    <section id="home" className="relative">
+      <div className="container-x grid min-h-[100dvh] items-center gap-12 pb-16 pt-28 lg:grid-cols-12 lg:gap-8 lg:pt-24">
+        {/* First-visit entrance: each block rises 80ms after the previous one */}
+        <div className="lg:col-span-7 [&>*]:animate-page-in">
+          <h1 className="display-h1">
+            Eduard
+            <br />
+            Puig Valls<span className="text-brand-500">.</span>
+          </h1>
 
-      {/* Photo — full right side, bleeds top-to-bottom */}
-      <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[58%] z-10 pointer-events-none">
-        <Image
-          src="/res/edu-portrait.png"
-          alt="Portrait of Eduard Puig Valls"
-          fill
-          sizes="(max-width: 1024px) 100vw, 58vw"
-          className="object-cover object-[50%_10%]"
-          priority
-        />
-        {/* Left edge fade — precise curve so face stays fully visible */}
-        <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,#07091c_0%,rgba(7,9,28,0.5)_25%,rgba(7,9,28,0.08)_45%,transparent_62%)]"
-          aria-hidden="true"
-        />
-        {/* Top edge fade */}
-        <div
-          className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-ink/80 to-transparent"
-          aria-hidden="true"
-        />
-        {/* Bottom edge fade */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-ink to-transparent"
-          aria-hidden="true"
-        />
-        {/* Mobile dark overlay */}
-        <div className="absolute inset-0 bg-ink/55 lg:bg-transparent" aria-hidden="true" />
-      </div>
-
-      {/* Text content */}
-      <div className="relative z-30 max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 w-full pt-20 pb-24">
-        {/* First-visit entrance: each block rises 60ms after the previous one */}
-        <div className="max-w-xl space-y-8 [&>*]:animate-rise">
-          <span className="eyebrow text-sm [animation-delay:0ms]">Hello, I am</span>
-
-          <div className="[animation-delay:60ms]">
-            <h1 className="text-5xl sm:text-6xl lg:text-[5.5rem] font-bold leading-[0.98] tracking-[-0.035em]">
-              Eduard
-              <br />
-              Puig Valls
-            </h1>
-            <p className="mt-5 text-xl text-subtle font-medium">
-              Digital Experience Engineer
-            </p>
-          </div>
-
-          <p className="text-muted text-base leading-relaxed max-w-[52ch] [animation-delay:120ms]">
-            Software Engineer with 3+ years building enterprise-grade digital
-            platforms and AI solutions at NTT DATA. Expert in Java, Python, LLM
-            &amp; RAG architectures. Based in Barcelona.
+          <p className="lead mt-8 [animation-delay:80ms]">
+            Digital Experience Engineer at NTT DATA. I build enterprise portals and AI products with Java,
+            Python and LLMs.
           </p>
 
-          <div className="flex flex-wrap gap-4 [animation-delay:180ms]">
-            {hasCv ? (
-              <a href={CV_PATH} download className="btn btn-primary">
-                <IconDownload />
-                Download CV
+          {/* Paired magnets: gentler pull + wider gap so the two never collide (max 15px each, 32px apart) */}
+          <div className="mt-10 flex flex-wrap items-center gap-8 [animation-delay:160ms]">
+            <Magnet strength={8}>
+              {hasCv ? (
+                <a href={CV_PATH} download className="btn btn-primary cursor-target">
+                  <DownloadSimpleIcon size={16} weight="bold" />
+                  Download CV
+                </a>
+              ) : (
+                <a href={`mailto:${EMAIL}`} className="btn btn-primary cursor-target">
+                  {CONTACT_LABEL}
+                </a>
+              )}
+            </Magnet>
+            <Magnet strength={8}>
+              <a href="#work" className="btn btn-ghost cursor-target">
+                View work
               </a>
-            ) : (
-              <a href={`mailto:${EMAIL}`} className="btn btn-primary">
-                Get in touch
-              </a>
-            )}
-            <a href="#work" className="btn btn-ghost text-white">
-              My work
-            </a>
+            </Magnet>
           </div>
+        </div>
 
-          {/* Scroll cue — a soft drift, not a bounce */}
-          <div className="pt-4 [animation-delay:240ms]" aria-hidden="true">
-            <div className="w-5 h-9 rounded-full border border-white/20 flex items-start justify-center pt-1.5">
-              <div className="w-0.5 h-2.5 bg-accent rounded-full animate-scroll-cue" />
-            </div>
-          </div>
+        {/* Holographic profile card (React Bits): tilts toward the cursor and catches the light once on load.
+            Width is capped by viewport height so the whole card fits above the fold on short laptops. */}
+        <div className="w-full animate-page-in justify-self-center [animation-delay:200ms] lg:col-span-5 lg:justify-self-end">
+          <ProfileCard
+            {...portraitProps}
+            avatarPosition="50% 15%"
+            avatarPriority
+            handle="eduard-puig-valls"
+            status="Available for new opportunities"
+            radius={14}
+            holo={0.45}
+            glare={0.35}
+            tiltStrength={10}
+            parallax={8}
+            className="mx-auto w-full max-w-[28rem] lg:mx-0 lg:ml-auto lg:max-w-[min(28rem,calc((100dvh-15rem)*0.8))]"
+          />
         </div>
       </div>
     </section>
@@ -122,44 +98,61 @@ function HeroSection() {
 
 // ─── About ───────────────────────────────────────────────────────────────────
 
+const experience = [
+  {
+    place: "NTT DATA",
+    role: "Digital Experience Engineer",
+    detail: "Java, Liferay DXP, Python, Azure OpenAI",
+  },
+  {
+    place: "Intelectium",
+    role: "Startup growth",
+    detail: "B2B lead generation for startups seeking public funding",
+  },
+  {
+    place: "UPF Barcelona",
+    role: "Audiovisual Systems Engineering",
+    detail: "Thesis: a motion sensor for a padel racket",
+  },
+];
+
 function AboutSection() {
   return (
-    <section id="about" className="pt-24 pb-28 lg:pt-32 lg:pb-40">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-        {/* Left: styled code card */}
-        <ProfileWritter />
-        {/* Right: text + skills */}
-        <div className="space-y-8 lg:pl-4">
-          <div>
-            <span className="eyebrow">01 · About me</span>
-            <h2 className="mt-4 text-3xl lg:text-[2.75rem] font-bold leading-[1.08] tracking-[-0.025em]">
-              Building scalable digital experiences
-            </h2>
+    <section id="about" className="section">
+      <div className="container-x">
+        <p className="eyebrow">About</p>
+        <h2 className="display-h2 mt-6 max-w-5xl">
+          From audiovisual systems to <span className="text-brand-400">enterprise software</span>.
+        </h2>
+
+        <div className="mt-16 grid gap-16 lg:mt-24 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-5">
+            <p className="lead">
+              At NTT DATA I lead cross-functional teams, architect enterprise Liferay portals in Java and deliver AI
+              chatbots with Python, Azure, LLM and RAG.
+            </p>
+            <p className="lead mt-6">The work runs in production for industrial clients worldwide.</p>
+
+            <dl className="mt-12 flex items-end gap-5">
+              <dt className="sr-only">Experience</dt>
+              <dd className="display-h2 text-brand-400 tabular-nums">3+</dd>
+              <dd className="max-w-[16ch] pb-2 text-secondary">years building enterprise platforms</dd>
+            </dl>
           </div>
 
-          <p className="text-muted leading-relaxed text-base max-w-[60ch]">
-            Audiovisual Systems Engineer (UPF Barcelona) turned Software
-            Engineer. At NTT DATA I lead cross-functional teams, architect
-            enterprise Liferay portals in Java, and deliver AI chatbot solutions
-            using Python, Azure, LLM and RAG — with measurable operational
-            impact for industrial clients worldwide.
-          </p>
-
-          <SkillsBars />
-
-          <div className="flex flex-wrap items-center gap-6 pt-2">
-            <a href={`mailto:${EMAIL}`} className="btn btn-primary">
-              Hire me
-            </a>
-            <a
-              href="#work"
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-pale hover:text-white transition-colors duration-200"
-            >
-              See projects
-              <span className="transition-transform duration-200 ease-out-strong group-hover:translate-x-1">
-                <IconArrow />
-              </span>
-            </a>
+          <div className="lg:col-span-6 lg:col-start-7">
+            <h3 className="text-sm text-mist">Experience</h3>
+            <ul className="mt-6">
+              {experience.map((e) => (
+                <li key={e.place} className="grid gap-1 border-t border-white/10 py-6 sm:grid-cols-[11rem_1fr] sm:gap-6">
+                  <p className="text-xl font-medium tracking-tight text-paper">{e.place}</p>
+                  <div>
+                    <p className="text-paper">{e.role}</p>
+                    <p className="meta mt-2">{e.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
@@ -172,13 +165,13 @@ function AboutSection() {
 /**
  * Runs the photo through the Next.js image optimizer: the browser picks a resized
  * WebP from `srcSet` instead of downloading the original (padel.webp is 4725px / 1.8 MB).
- * The image card is at most ~560px wide, so `sizes` lets a 2x screen settle on ~1200px.
+ * The image card is at most ~620px wide, so `sizes` lets a 2x screen settle on ~1200px.
  */
 function photo(img: StaticImageData, alt: string) {
   const { props } = getImageProps({
     src: img,
     alt,
-    sizes: "(max-width: 768px) 100vw, 560px",
+    sizes: "(max-width: 768px) 100vw, 620px",
   });
   return { src: props.src, srcSet: props.srcSet, sizes: props.sizes, alt };
 }
@@ -187,25 +180,25 @@ function photo(img: StaticImageData, alt: string) {
 const hobbies: Testimonial[] = [
   {
     name: "Padel",
-    designation: "01 / Sport & thesis",
+    designation: "Sport and thesis",
     quote:
-      "My go-to sport. I even built a sensor for my racket as my thesis — combining sport and engineering felt completely natural.",
+      "My go-to sport. I even built a sensor for my racket as my thesis: combining sport and engineering felt completely natural.",
     ...photo(padelPhoto, "Eduard on a padel court, racket in hand, next to the net"),
     objectPosition: "50% 40%",
   },
   {
     name: "Crossfit",
-    designation: "02 / Discipline",
+    designation: "Discipline",
     quote:
-      "Discipline outside the gym translates directly to work. Consistency, pushing limits, and measuring progress — every session.",
+      "Discipline outside the gym translates directly to work. Consistency, pushing limits and measuring progress, every session.",
     ...photo(crossfitPhoto, "Eduard holding a barbell overhead at a CrossFit competition"),
     objectPosition: "50% 30%",
   },
   {
     name: "Drone pilot",
-    designation: "03 / FPV",
+    designation: "FPV",
     // TODO(eduard): texto definitivo
-    quote: "Placeholder — final copy coming soon.",
+    quote: "Placeholder: final copy coming soon.",
     ...photo(dronePhoto, "Eduard wearing FPV goggles, launching a small drone from his hand"),
     objectPosition: "50% 35%",
   },
@@ -213,66 +206,71 @@ const hobbies: Testimonial[] = [
 
 function PersonalSection() {
   return (
-    <section id="personal" className="pt-24 pb-28 lg:pt-32 lg:pb-40">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end mb-12">
-          <div className="lg:col-span-7">
-            <span className="eyebrow">03 · Beyond the code</span>
-            <h2 className="mt-4 text-3xl lg:text-[2.75rem] font-bold leading-[1.08] tracking-[-0.025em]">
-              A bit about me
-            </h2>
-          </div>
-          <p className="lg:col-span-5 text-muted text-base max-w-[48ch] leading-relaxed">
-            Not everything is code — here&apos;s what keeps me going outside work.
-          </p>
-        </div>
+    <section id="personal" className="section">
+      <div className="container-x">
+        <p className="eyebrow">Beyond the code</p>
+        <h2 className="display-h2 mt-6">A bit about me</h2>
+        <p className="lead mt-6">Not everything is code. Here&apos;s what keeps me going outside work.</p>
 
-        <CircularTestimonials testimonials={hobbies} label="Beyond the code" />
+        <CircularTestimonials testimonials={hobbies} label="Beyond the code" className="mt-12 md:mt-20" />
       </div>
     </section>
   );
 }
 
-// ─── Contact CTA ─────────────────────────────────────────────────────────────
+// ─── Contact ─────────────────────────────────────────────────────────────────
 
 function ContactSection() {
   return (
-    <section
-      id="contact"
-      className="relative overflow-hidden pt-24 pb-28 lg:pt-32 lg:pb-40 bg-surface border-t border-white/5"
-    >
-      {/* Ambient warm/cool glow — mirrors the hero photo lighting */}
+    <section id="contact" className="section relative overflow-hidden">
+      {/* One ember glow, low and to the left: the page's only light source */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_15%_100%,rgba(191,29,51,0.14),transparent_70%),radial-gradient(ellipse_50%_60%_at_90%_0%,rgba(45,94,200,0.14),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_10%_110%,rgb(255_91_46/0.14),transparent_70%)]"
         aria-hidden="true"
       />
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-16">
-        <span className="eyebrow">04 · Ready to collaborate</span>
-        <h2 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.02] tracking-[-0.035em] max-w-[16ch]">
-          I&apos;m available for new opportunities
+      <div className="container-x relative">
+        <h2 className="display-h2 max-w-5xl">
+          Let&apos;s build something <span className="text-brand-400">together</span>.
         </h2>
-        <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
-          <p className="lg:col-span-6 text-muted text-base leading-relaxed max-w-[52ch]">
-            Looking for a senior engineer who bridges deep Java &amp; Python
-            expertise with technical leadership and AI delivery? Let&apos;s talk.
-          </p>
-          <div className="lg:col-span-6 flex flex-wrap items-center gap-4 lg:justify-end">
-            <a href={`mailto:${EMAIL}`} className="btn btn-primary px-7">
-              Contact me
-            </a>
-            <a
-              href={LINKEDIN}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-ghost px-7 text-white"
-            >
-              LinkedIn
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-              </svg>
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
+
+        <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-6">
+            <p className="lead">
+              Looking for an engineer who bridges deep Java and Python expertise with technical leadership and AI
+              delivery? Let&apos;s talk.
+            </p>
+            <Magnet className="mt-10 inline-block">
+              <a href={`mailto:${EMAIL}`} className="btn btn-primary cursor-target h-12 px-6 text-base">
+                {CONTACT_LABEL}
+              </a>
+            </Magnet>
           </div>
+
+          <dl className="grid content-start gap-8 lg:col-span-5 lg:col-start-8">
+            <div className="border-t border-white/10 pt-5">
+              <dt className="meta">Email</dt>
+              <dd className="mt-2 text-xl tracking-tight text-paper">
+                <a href={`mailto:${EMAIL}`} className="uv-link cursor-target">
+                  {EMAIL}
+                </a>
+              </dd>
+            </div>
+            <div className="border-t border-white/10 pt-5">
+              <dt className="meta">LinkedIn</dt>
+              <dd className="mt-2 text-xl tracking-tight text-paper">
+                <a
+                  href={LINKEDIN}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="uv-link cursor-target inline-flex items-center gap-1.5"
+                >
+                  eduard-puig-valls
+                  <ArrowUpRightIcon size={16} weight="bold" aria-hidden="true" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
     </section>
@@ -283,24 +281,31 @@ function ContactSection() {
 
 function FooterSection() {
   return (
-    <footer className="border-t border-white/5 py-8">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted/60">
-        <p>&copy; {new Date().getFullYear()} Eduard Puig Valls</p>
-        <div className="flex items-center gap-6">
-          <a href={`mailto:${EMAIL}`} className="hover:text-white transition-colors duration-200">
-            Email
-          </a>
-          <a
-            href={LINKEDIN}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors duration-200"
-          >
-            LinkedIn
-          </a>
-          <a href="#home" className="hover:text-white transition-colors duration-200">
-            Back to top ↑
-          </a>
+    <footer className="border-t border-white/10 pt-20">
+      <div className="container-x">
+        <p className="display-footer text-paper/90" aria-hidden="true">
+          Eduard Puig<span className="text-brand-500">.</span>
+        </p>
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 py-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="meta">&copy; {new Date().getFullYear()} Eduard Puig Valls. Barcelona</p>
+          <ul className="flex items-center gap-6 text-sm text-secondary">
+            <li>
+              <a href={`mailto:${EMAIL}`} className="uv-link cursor-target">
+                Email
+              </a>
+            </li>
+            <li>
+              <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="uv-link cursor-target">
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="#home" className="uv-link cursor-target inline-flex items-center gap-1.5">
+                Back to top
+                <ArrowUpIcon size={13} weight="bold" aria-hidden="true" />
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
     </footer>
@@ -313,7 +318,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main id="main" className="bg-ink text-fg overflow-x-hidden">
+      <main id="main">
         <HeroSection />
         <AboutSection />
         <WorkSection />

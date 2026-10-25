@@ -36,7 +36,7 @@ function LogoSet({ hidden = false }: { hidden?: boolean }) {
             width={0}
             height={0}
             sizes="160px"
-            className="h-10 w-auto object-contain brightness-0 invert opacity-50 transition-opacity duration-200 hover:opacity-90"
+            className="h-9 w-auto object-contain brightness-0 invert opacity-45 transition-opacity duration-200 hover:opacity-90"
           />
         </li>
       ))}
@@ -48,8 +48,8 @@ function LogoSet({ hidden = false }: { hidden?: boolean }) {
 // Hovering pauses it, so a logo can be looked at. Reduced motion stops it (see globals.css).
 export default function StatsTicker() {
   return (
-    <section aria-label="Technologies I work with" className="py-12 border-y border-white/5">
-      <div className="max-w-7xl mx-auto overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6rem,black_calc(100%-6rem),transparent)]">
+    <section aria-label="Technologies I work with" className="border-t border-white/10 py-14">
+      <div className="container-x overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6rem,black_calc(100%-6rem),transparent)]">
         <div className="flex w-max py-3 animate-marquee hover:[animation-play-state:paused]">
           <LogoSet />
           <LogoSet hidden />

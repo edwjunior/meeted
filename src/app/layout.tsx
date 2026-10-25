@@ -1,19 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, DM_Sans } from "next/font/google";
-import { Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import MotionProvider from "@/components/MotionProvider";
+import TargetCursor from "@/components/interactions/TargetCursor";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+// Variable names match the design system's tailwind-theme.css (--font-geist-sans / --font-geist-mono)
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -22,20 +16,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eduard Puig Valls — Digital Experience Engineer",
+  title: "Eduard Puig Valls | Digital Experience Engineer",
   description:
-    "Portfolio of Eduard Puig Valls, Digital Experience Engineer specializing in enterprise portals, AI & LLM solutions, and technical leadership. Based in Barcelona.",
+    "Portfolio of Eduard Puig Valls, Digital Experience Engineer building enterprise portals, AI and LLM solutions. Based in Barcelona.",
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "Eduard Puig Valls — Digital Experience Engineer",
-    description:
-      "Enterprise portals, AI & LLM solutions and technical leadership. Based in Barcelona.",
+    title: "Eduard Puig Valls | Digital Experience Engineer",
+    description: "Enterprise portals, AI and LLM solutions, and technical leadership. Based in Barcelona.",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07091c",
+  themeColor: "#0b0b0c",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -44,18 +38,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="flex min-h-full flex-col">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[70] focus:rounded focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-full focus:bg-paper focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-ink"
         >
           Skip to content
         </a>
         <MotionProvider>{children}</MotionProvider>
+        <TargetCursor />
       </body>
     </html>
   );

@@ -1,121 +1,121 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ListIcon, XIcon } from "@phosphor-icons/react";
 
-const links = ["About", "Work", "Personal", "Contact"];
+import Magnet from "@/components/interactions/Magnet";
+import PillNav, { type PillLink } from "@/components/interactions/PillNav";
+import { cn } from "@/lib/utils";
+import { CONTACT_LABEL, EMAIL } from "@/lib/site";
+
+// Module-level so PillNav's GSAP timelines are not rebuilt on every render
+const LINKS: PillLink[] = [
+  { label: "About", href: "#about" },
+  { label: "Work", href: "#work" },
+  { label: "Personal", href: "#personal" },
+  { label: "Contact", href: "#contact" },
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
 
-  // Highlight the link of the section currently in the middle of the viewport
+  // Highlight the section currently crossing the middle of the viewport
   useEffect(() => {
-    const sections = links
-      .map((link) => document.getElementById(link.toLowerCase()))
-      .filter((el): el is HTMLElement => el !== null);
-
+    const sections = LINKS.map((l) => document.querySelector<HTMLElement>(l.href)).filter(
+      (el): el is HTMLElement => el !== null,
+    );
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        }
+        for (const entry of entries) if (entry.isIntersecting) setActive(`#${entry.target.id}`);
       },
-      { rootMargin: "-45% 0px -50% 0px" }
+      { rootMargin: "-45% 0px -50% 0px" },
     );
-
-    sections.forEach((section) => observer.observe(section));
+    sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
   }, []);
 
+  // Esc closes the mobile menu
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    addEventListener("keydown", onKey);
+    return () => removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
-    <nav
-      aria-label="Main"
-      className="fixed top-0 left-0 right-0 z-50 bg-ink/85 backdrop-blur-md border-b border-white/5"
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
-        <a href="#home" className="text-xl font-bold tracking-tight text-white">
-          Eduard<span className="text-cool">.</span>
-        </a>
-
-        <ul className="hidden md:flex items-center gap-8 text-sm font-medium">
-          {links.map((link) => {
-            const id = link.toLowerCase();
-            const isActive = active === id;
-            return (
-              <li key={link}>
-                <a
-                  href={`#${id}`}
-                  aria-current={isActive ? "location" : undefined}
-                  className={`relative py-1 transition-colors duration-200 after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-full after:origin-left after:bg-accent after:transition-transform after:duration-200 after:ease-out-strong ${
-                    isActive
-                      ? "text-white after:scale-x-100"
-                      : "text-muted hover:text-white after:scale-x-0"
-                  }`}
-                >
-                  {link}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-
+    <header className="fixed inset-x-0 top-4 z-50">
+      {/* Scrim: keeps the logo and CTA legible over content scrolling underneath */}
+      <div
+        className="pointer-events-none absolute inset-x-0 -top-4 -z-10 h-28 bg-gradient-to-b from-ink via-ink/75 to-transparent"
+        aria-hidden="true"
+      />
+      <nav aria-label="Main" className="container-x grid grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]">
         <a
-          href="mailto:edupuigjunior.6@gmail.com"
-          className="btn btn-primary btn-sm hidden md:inline-flex shadow-none"
+          href="#home"
+          className="cursor-target justify-self-start rounded-full px-1 text-[15px] font-semibold tracking-tight text-paper"
         >
-          Hire me
+          Eduard Puig<span className="text-brand-500">.</span>
         </a>
+
+        <div className="hidden md:block">
+          <PillNav links={LINKS} activeHref={active} />
+        </div>
+
+        <div className="hidden justify-self-end md:block">
+          <Magnet>
+            <a href={`mailto:${EMAIL}`} className="btn btn-primary cursor-target h-10">
+              {CONTACT_LABEL}
+            </a>
+          </Magnet>
+        </div>
 
         <button
           type="button"
-          onClick={() => setOpen(!open)}
-          className="md:hidden p-2 text-muted hover:text-white transition-colors cursor-pointer"
+          onClick={() => setOpen((v) => !v)}
+          className="glass grid size-11 cursor-pointer place-items-center justify-self-end rounded-full text-paper transition-[scale] duration-150 ease-out-strong active:scale-[0.97] md:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="mobile-menu"
         >
-          {open ? (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+          {open ? <XIcon size={18} weight="bold" /> : <ListIcon size={18} weight="bold" />}
         </button>
-      </div>
+      </nav>
 
       {open && (
-        // Enters via @starting-style (Tailwind `starting:`), no JS mount state needed
-        <div
-          id="mobile-menu"
-          className="md:hidden border-t border-white/5 bg-ink px-6 py-5 space-y-4 origin-top transition-[opacity,transform] duration-200 ease-out-strong starting:opacity-0 starting:-translate-y-2"
-        >
-          {links.map((link) => {
-            const id = link.toLowerCase();
-            return (
-              <a
-                key={link}
-                href={`#${id}`}
-                onClick={() => setOpen(false)}
-                aria-current={active === id ? "location" : undefined}
-                className={`block py-1 transition-colors ${
-                  active === id ? "text-white" : "text-muted hover:text-white"
-                }`}
-              >
-                {link}
-              </a>
-            );
-          })}
-          <a
-            href="mailto:edupuigjunior.6@gmail.com"
-            className="btn btn-primary btn-sm mt-2 shadow-none"
+        // Enters via @starting-style (Tailwind `starting:`); exit is instant — the user is done with it
+        <div className="container-x md:hidden">
+          <div
+            id="mobile-menu"
+            className={cn(
+              "glass mt-3 rounded-3xl p-3 shadow-float",
+              "origin-top transition-[opacity,translate,scale] duration-200 ease-out-strong",
+              "starting:-translate-y-2 starting:scale-[0.98] starting:opacity-0",
+            )}
           >
-            Hire me
-          </a>
+            <ul className="grid">
+              {LINKS.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active === link.href ? "location" : undefined}
+                    className={cn(
+                      "flex h-12 items-center rounded-full px-4 text-base font-medium tracking-tight transition-colors duration-200",
+                      active === link.href ? "bg-paper text-ink" : "text-paper active:bg-white/10",
+                    )}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <a href={`mailto:${EMAIL}`} className="btn btn-primary mt-3 w-full">
+              {CONTACT_LABEL}
+            </a>
+          </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }
