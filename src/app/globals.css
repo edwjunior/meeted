@@ -38,6 +38,12 @@
   --color-quaternary: var(--color-mist-2);
   --color-placeholder: #857f76;
 
+  /* Logo: text-logo / fill-logo-accent. light-dark() follows the document's color-scheme,
+     so the logo is paper today (dark-only) and turns ink by itself once the site
+     opts into `color-scheme: light dark`. */
+  --color-logo: light-dark(var(--color-ink), var(--color-paper));
+  --color-logo-accent: #fe7c54;
+
   /* Typography — Geist via next/font (variables set in layout.tsx) */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

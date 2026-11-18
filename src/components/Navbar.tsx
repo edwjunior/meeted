@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ListIcon, XIcon } from "@phosphor-icons/react";
 
+import { LogoMark, LogoWordmark } from "@/components/brand/Logo";
 import Magnet from "@/components/interactions/Magnet";
 import PillNav, { type PillLink } from "@/components/interactions/PillNav";
 import { cn } from "@/lib/utils";
@@ -53,9 +54,11 @@ export default function Navbar() {
       <nav aria-label="Main" className="container-x grid grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]">
         <a
           href="#home"
-          className="cursor-target justify-self-start rounded-full px-1 text-[15px] font-semibold tracking-tight text-paper"
+          aria-label="Edu Puig, back to top"
+          className="cursor-target flex items-center gap-2.5 justify-self-start rounded-full px-1 text-logo"
         >
-          Eduard Puig<span className="text-brand-500">.</span>
+          <LogoMark className="h-8 w-auto" />
+          <LogoWordmark className="h-[18px] w-auto" />
         </a>
 
         <div className="hidden md:block">
