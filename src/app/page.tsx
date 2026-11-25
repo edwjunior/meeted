@@ -42,9 +42,11 @@ function HeroSection() {
         {/* First-visit entrance: each block rises 80ms after the previous one */}
         <div className="lg:col-span-7 [&>*]:animate-page-in">
           <h1 className="display-h1">
-            Eduard
+            Hi, I am
             <br />
-            Puig Valls<span className="text-brand-500">.</span>
+            <span className="text-brand-500">Eduard </span>
+            <br />
+            Puig
           </h1>
 
           <p className="lead mt-8 [animation-delay:80ms]">
